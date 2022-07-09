@@ -1,3 +1,5 @@
+// Kruskal最小生成树算法，并查集 + 贪心
+
 class UnionFind {
     vector<int> parent;
 public:
