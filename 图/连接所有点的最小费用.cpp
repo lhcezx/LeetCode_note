@@ -80,51 +80,50 @@ public:
 };
 
 
+//  Prim算法
 
-
-//  Prim算法的核心是，初始化创建无向图的邻接表，将第0个节点标记为遍历过，同时将0节点的包含其相邻节点和边权重的struct edge放入堆中，堆是最小堆，堆顶存放的元素是权重最小的边。当堆不为空时，我们不断地从堆中取出最小权重边，然后将边连接的节点标记为true，直至堆为空
-//  最后判断是否每个节点都被遍历，若是则返回最小加权和。  需要注意的是每次将某个节点的相邻节点放入堆时，需要判断该节点是否已经被遍历，若是则跳过这次循环，从堆中取出元素的时候做同样的操作，防止出现环、
-
-struct edge {           
+struct edge {
     int to;
     int weight;
     edge(int _to, int _weight): to(_to), weight(_weight) {}
 };
 
-struct comp{
+struct comp {                           //  小顶堆
     bool operator()(edge& a, edge& b) {
-        return a.weight > b.weight;
+        return a.weight > b.weight;     //  true时将a排在b前面，heap.top()返回heap中的最后一个元素，也就是最小的元素
     }
 };
 
+
 class Prim {
-    vector<vector<edge>> graph;                             //  无向加权图的邻接表
-    vector<bool> inMST;                                     //  MST为最小生成树, 用于判断是否某个节点已经存在于最小生成树
-    priority_queue<edge, vector<edge>, comp> heap;          //  用于动态找到最小权重边
+    vector<vector<edge>> graph;
+    vector<bool> inMST;
+    priority_queue<edge, vector<edge>, comp> heap;
+    
 public:
     int total_cost = 0;
-    Prim(vector<vector<edge>>& _graph) {
+    Prim(vector<vector<edge>> _graph) {
         graph = _graph;
         inMST.resize(graph.size());
-        inMST[0] = true;                                    //  我们从第0个节点开始
-        cut(0);                                             //  将和0节点相邻的节点放到堆中，同时存入他们的权重
+        inMST[0] = 1;
+        cut(0);
         while (!heap.empty()) {
             edge min_edge = heap.top();
             heap.pop();
-            if (inMST[min_edge.to]) continue;
+            if (inMST[min_edge.to]) continue;                     //  如果这个节点已经遍历过
             inMST[min_edge.to] = true;
             total_cost += min_edge.weight;
             cut(min_edge.to);
         }
-        for (int i = 0; i < inMST.size(); i++) {
-            if (inMST[i] == 0) total_cost = -1;             // 如果某个节点不在图中，代表没有连接所有的节点
+        for (int i = 0; i < inMST.size(); i++) {                  //  确保整个图中每个节点都被遍历到
+            if (inMST[i] == 0) total_cost = -1;
         }
+
     }
 
-    void cut(int start) {      //  将和start相邻的节点放入堆中
-        for (auto& edge: graph[start]) {
-            int to = edge.to;
-            if (inMST[to]) continue;                        //  如果该相邻节点已经在路径中，则跳过该节点防止成环
+    void cut(int start) {
+        for (edge& edge: graph[start]) {
+            if (inMST[edge.to]) continue;
             heap.push(edge);
         }
     }
@@ -133,22 +132,32 @@ public:
 
 class Solution {
 public:
-    //  由于是无向加权图，所以邻接表中不能仅存放int类型表示to节点，还需要存放权重weight; 若不用struct则需要写成vector<vector<vector<int>>>, 最外面的vector代表邻接表，第二个vector代表每个节点相邻的节点, 最里面vector代表相邻的节点的下标及其权重
-    vector<vector<edge>> buildGraph(int n, vector<vector<int>>& connections) {      
+
+    int dist(vector<int>& a, vector<int>& b) {
+        return abs(a[0] - b[0]) + abs(a[1] - b[1]);
+    }
+
+    vector<vector<edge>> buildGraph(vector<vector<int>>& points) {
+        int n = points.size();
         vector<vector<edge>> graph(n);
-        for (auto& connection: connections) {
-            int from = connection[0] - 1;
-            int to = connection[1] - 1;
-            int weight = connection[2];
-            graph[from].emplace_back(to, weight);       //  无向加权图
-            graph[to].emplace_back(from, weight);    
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int from = i;
+                int to = j;
+                int d = dist(points[i], points[j]);
+                graph[from].emplace_back(to, d);                //  无向加权图
+                graph[to].emplace_back(from, d);
+            }
         }
         return graph;
     }
 
-    int minimumCost(int n, vector<vector<int>>& connections) {
-        vector<vector<edge>> graph = buildGraph(n, connections);
+    int minCostConnectPoints(vector<vector<int>>& points) {
+        vector<vector<edge>> graph = buildGraph(points);
         Prim* P = new Prim(graph);
         return P->total_cost;
     }
 };
+
+
+
