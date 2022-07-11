@@ -1,35 +1,67 @@
-// 本题思路为将list中的每个头节点即每个链表的最小值节点放入最小堆中，堆顶元素为k个链表的头节点中最小的头节点，通过迭代将头节点出队然后将其子节点放入堆中，堆会自动将其他链表的头节点和其子节点排序，最小值节点仍在堆顶。不断的将每一个子节点压入堆中，并出堆，直至堆为空。
+// 堆
+
+struct cmp {
+    bool operator()(ListNode* a, ListNode*b) {
+        return a->val > b->val;                 //  最小的值会被放在最后面，pop_back()会直接弹出最小值
+    }
+};
+class Solution {
+    priority_queue<ListNode*, vector<ListNode*>, cmp> heap;
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        ListNode* dummy_head = new ListNode(-1);
+        ListNode* cur = dummy_head;
+
+        for (auto list: lists) {
+            if (list != nullptr) heap.push(list);
+        }
+        while (!heap.empty()) {
+            ListNode* top = heap.top();
+            heap.pop();
+            cur->next = top;
+            cur = cur->next;
+            if (top->next != nullptr) heap.push(top->next);
+        }
+        cur->next = nullptr;
+        return dummy_head->next;
+    }
+};
+
+
+//  归并排序
 
 class Solution {
 public:
-    //  自定义比较函数，根据节点的值从小到大排序，实现最小堆
-    class comp {
-    public:
-        bool operator() (ListNode* a, ListNode* b){
-            if (a && b) return a->val > b->val;  // 按照从小到大
-            return true;
+    ListNode* merge(ListNode* left, ListNode* right) {      //  合并两个有序链表
+        ListNode* dummy_head = new ListNode(-1);
+        ListNode* cur = dummy_head;
+        while (left != nullptr && right != nullptr) {
+            if (left->val <= right->val) {
+                cur->next = left;
+                left = left->next;
+            } else {
+                cur->next = right;
+                right = right->next;
+            }
+            cur = cur->next;
         }
-    };
+        if (left != nullptr) cur->next = left;
+        else cur->next = right;
+        return dummy_head->next;
+    }
+
+
+    ListNode* mergeSort(vector<ListNode*>& lists, int left, int right) {
+        if (left >= right) return lists[left];
+        int mid = left + (right - left) / 2;
+        ListNode* left_node = mergeSort(lists, left, mid);              //  将[left, mid]区间内的所有有序链表合并
+        ListNode* right_node = mergeSort(lists, mid + 1, right);        //  将[mid + 1, right]区间内的所有有序链表合并
+        return merge(left_node, right_node);
+    }
+
 
     ListNode* mergeKLists(vector<ListNode*>& lists) {
-        priority_queue<ListNode*, vector<ListNode*>, comp> pq;
-        ListNode* head = new ListNode(-1);
-        ListNode* p = head;                 // 双指针
-        for(ListNode* node: lists) {
-            if (node) pq.push(node);                  //将lists中的每个链表头节点放到最小堆中  
-        }
-
-        while (!pq.empty()) {  
-            ListNode* tmp = pq.top();   // 取出堆中最小值的节点
-            pq.pop();
-            if (p && tmp) {
-                p->next = tmp;          
-                if (tmp->next) pq.push(tmp->next);
-                p = p->next;
-            }
-
-        }
-        return head->next;
-        
+        if (lists.empty()) return nullptr;
+        return mergeSort(lists, 0, lists.size() - 1);
     }
 };
