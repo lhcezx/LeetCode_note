@@ -23,3 +23,50 @@ public:
         else return minheap.top()*1.0;
     }
 };
+
+
+//
+class MedianFinder {
+    priority_queue<int> A;                                         //  大顶堆
+    priority_queue<int, vector<int>, greater<int>> B;              //  小顶堆
+    int count = 0;
+public:
+    MedianFinder() {
+    }
+    
+    void addNum(int num) {
+        if (count == 0) {
+            A.push(num);
+            count++;
+            return;
+        }
+        if (count % 2 == 0) {
+            B.push(num);
+            int top = B.top();
+            B.pop();
+            A.push(top);
+            count++;
+        } else {
+            A.push(num);
+            int top = A.top();
+            A.pop();
+            B.push(top);
+            count++;
+        }
+    }
+    
+    double findMedian() {
+        if (count % 2 == 0) {
+            return (A.top() + B.top()) / 2.0;
+        } else {
+            return A.top() * 1.0;
+        }
+    }
+};
+
+/**
+ * Your MedianFinder object will be instantiated and called as such:
+ * MedianFinder* obj = new MedianFinder();
+ * obj->addNum(num);
+ * double param_2 = obj->findMedian();
+ */

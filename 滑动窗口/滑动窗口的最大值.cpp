@@ -1,26 +1,23 @@
+//  使用单调队列的数据结构是为了满足滑动窗口的性质，具有时序性，窗口左边的元素会被先弹出去，先入先出; 为了保证队列的单调递减性质，需要将比队首小的元素全部pop出去，因此要从队尾pop而普通的队列无法满足这个性质，所以需要用双端队列。
+
 class Solution {
 public:
     vector<int> maxSlidingWindow(vector<int>& nums, int k) {
-        vector<int> res;         
-        if (nums.empty()) return res;           
         deque<int> dq;
-        dq.push_back(nums[0]);               //  首先将num中第一个元素放入队列
-        // 窗口未开始滑动
-        for (int i = 1; i < k; i++) {        //  将第一个滑动窗口[0, k) 内的元素按照从大到小放入队列，此时窗口还未开始滑动
-        //  将所有比nums[i]小的元素从队列中删除后将nums[i]插入到队尾，因为i位置前比它小的元素将不再有任何意义，即便窗口开始滑动，nums[i]前的值也不会是窗口最大值，因为nums[i]比他们值更大
-            while (!dq.empty() && nums[i] > dq.back()) {       
-                dq.pop_back();
-            }
-            dq.push_back(nums[i]);
-        }
-        res.push_back(dq[0]);
-
-        // 窗口开始滑动
-        for (int i = k; i < nums.size(); i++) {
-            if (nums[i - k] == dq[0])  dq.pop_front(); // 若队列中的最大值在窗口滑动后被滑过，则删除队首元素
+        vector<int> res;
+        //  窗口还未开始滑动，构建单调双端队列，从队首到队尾递减
+        for (int i = 0; i < k - 1; i++) {
             while (!dq.empty() && nums[i] > dq.back()) dq.pop_back();
             dq.push_back(nums[i]);
-            res.push_back(dq[0]);
+        }
+
+        //  形成窗口了，构建左右指针开始滑动
+        for (int right = k - 1; right < nums.size(); right++) {
+            int left = right - k + 1;
+            while (!dq.empty() && nums[right] > dq.back()) dq.pop_back();           //  即将入队的元素会pop出去所有比它小的元素然后入队尾, 保证严格单调递减. 队内元素排在即将入队的元素的索引前面，并且一定在滑动窗口内, 如果即将入队的元素比它们大，那么它们一定不会是滑动窗口的最大值，因此全部pop
+            dq.push_back(nums[right]);
+            res.push_back(dq.front());                                              //  推入队首元素也就是当前窗口的最大元素
+            if (dq.front() == nums[left]) dq.pop_front();                           //  如果队首元素等于滑动窗口左指针，那么将其pop掉
         }
         return res;
     }
