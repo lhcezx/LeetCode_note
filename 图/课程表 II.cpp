@@ -14,6 +14,7 @@ public:
     }
 
     void traverse(vector<vector<int>>& graph, int start) {
+        //  ！！！注意这里的onPath[start]用来判定是否存在环必须放在visited[start]判别式的上面，否则如果将visited判别式放在前面时, 当我们发现环回到启始点时会直接return，并不会通过onPath[start]来判别存在环
         if (onPath[start]) hasCycle = true;
         if (visited[start] || hasCycle) return;
         visited[start] = true;
@@ -30,11 +31,10 @@ public:
         visited.resize(numCourses);
         onPath.resize(numCourses);
         vector<vector<int>> graph = buildGraph(numCourses, prerequisites);
+        //  这里必须将每一个节点当作起点遍历一遍，因为题目没有指出是连通图，因此我们需要保证每一个子图都不存在环
         for (int i = 0; i < numCourses; i++) {
-            traverse(graph, i);
-        }
-        if (hasCycle) {
-            return vector<int>();
+            if (hasCycle) return vector<int>();
+            if (!visited[i]) traverse(graph, i);
         }
         reverse(res.begin(), res.end());
         return res;

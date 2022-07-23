@@ -53,6 +53,7 @@ public:
     }
 
     void traverse(vector<vector<int>>& graph, int start) {      //  以start节点为启始点开始遍历
+    //  ！！！注意这里的onPath[start]用来判定是否存在环必须放在visited[start]判别式的上面，否则如果将visited判别式放在前面时, 当我们发现环回到启始点时会直接return，并不会通过onPath[start]来判别存在环
         if (onPath[start]) hasCycle = true;                     //  代表我们当前遍历的路径中有环
         if (visited[start] || hasCycle) return;                 //  若当前节点已经被遍历过，或者发现存在有环，则return
         
@@ -68,7 +69,8 @@ public:
         visited.resize(numCourses);
         onPath.resize(numCourses);
         vector<vector<int>> graph = buildGraph(numCourses, prerequisites);
-        for (int i = 0; i < numCourses; i++) {                   //  这里需要使用for循环遍历每个节点，因为有可能节点的路径中完全不包含其中某些节点，因此我们必须访问每个节点的邻接节点
+        //  这里必须将每一个节点当作起点遍历一遍，因为题目没有指出是连通图，因此我们需要保证每一个子图都不存在环
+        for (int i = 0; i < numCourses; i++) {                   
             traverse(graph, i);  
         }
         return !hasCycle;
