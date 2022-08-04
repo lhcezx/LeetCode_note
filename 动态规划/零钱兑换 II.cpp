@@ -3,7 +3,7 @@ class Solution {
     vector<vector<int>> memo;
 public:
     //  返回从coins[0, i]中选择的硬币，刚好装满容量为amount的背包的硬币组合数
-    int dp(vector<int>& coins, int i,int amount) {
+    int dp(vector<int>& coins, int i, int amount) {
         if (amount == 0) return 1;                  //  当背包容量为0，没有任何硬币可以放入, 只有这一种组合数
         if (i == -1) return 0;                      //  当没有可以选择的硬币时，组合数为0
         int j = amount;
