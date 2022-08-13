@@ -1,3 +1,4 @@
+//  哈希表
 class Solution {
 public:
     vector<vector<string>> groupAnagrams(vector<string>& strs) {
@@ -12,6 +13,28 @@ public:
         }
         for (auto tmp: hash_map) {
             res.push_back(tmp.second);
+        }
+        return res;
+    }
+};
+
+
+//  计数法
+//  用每个字符串中每个字母出现的次数表作为键
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        vector<vector<string>> res;
+        unordered_map<string, vector<string>> hash_map;
+        for (string str: strs) {
+            string tmp = string(26, '0');
+            for (char c: str) {
+                tmp[c - 'a']++;
+            }
+            hash_map[tmp].push_back(str);           //  出现相同字母次数的字符会放在同一个键中
+        }
+        for (auto cur: hash_map) {
+            res.push_back(cur.second);
         }
         return res;
     }
