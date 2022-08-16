@@ -1,67 +1,55 @@
 //  双向有权图，BFS。将每个字符串变量映射成Id用来构成节点，用除法计算结果values代表两个节点的边的权重，每次计算请求queries[0]就是起点，quieries[1]是终点，计算之间的路径权重乘积
 
+typedef pair<string, double> edge;
+
 class Solution {
-    vector<vector<pair<int, double>>> graph;
-    unordered_map<string, int> var_Id;
-    vector<bool> visited;
-    int numNodes = 0;
+    unordered_map<string, vector<edge>> graph;
+    unordered_set<string> set;                                  //  用于判断节点是否存在在途中
 public:
     void buildGraph(vector<vector<string>>& equations, vector<double>& values) {
-        //  给每个变量创建哈希映射
-        for (auto& equation: equations) {                               
-            string from = equation[0];
-            string to = equation[1];
-            if (!var_Id.count(from)) var_Id[from] = numNodes++;
-            if (!var_Id.count(to)) var_Id[to] = numNodes++;
-        }
-        graph.assign(numNodes, vector<pair<int, double>>());       
         for (int i = 0; i < equations.size(); i++) {
-            int from_id = var_Id[equations[i][0]];
-            int to_id = var_Id[equations[i][1]];
-            double val = values[i];
-            graph[from_id].emplace_back(to_id, val);
-            graph[to_id].emplace_back(from_id, 1 / val);
-        }
+            string from = equations[i][0];
+            string to = equations[i][1];
+            double value = values[i];
+            graph[from].emplace_back(to, value);                //  用哈希表保存节点和边的权重，注意是双向边
+            graph[to].emplace_back(from, 1.0 / value);
+            if (!set.count(from)) set.insert(from);
+            if (!set.count(to)) set.insert(to);
+
+        }   
     }
 
     vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
         vector<double> res;
         buildGraph(equations, values);
         for (auto querie: queries) {
-            visited.assign(numNodes, false);                              //  每次有新的计算请求，需要将visited全部重置为false
-            if (!var_Id.count(querie[0]) || !var_Id.count(querie[1])) {
+            string from = querie[0];
+            string to = querie[1];
+            if (!set.count(from) || !set.count(to)) {           //  判断变量是否合法
                 res.push_back(-1.0);
                 continue;
             }
-            int start = var_Id[querie[0]];
-            int end = var_Id[querie[1]];
-            if (start == end) {
-                res.push_back(1.0);
-                continue;
-            }
-            queue<pair<int, double>> q;                                    //  pair对应节点和路径值
-            q.emplace(start, 1.0);
-            bool found = false;                                            //  判断是否找到了正确的计算路径
+            unordered_map<string, bool> visited;                //  每次请求都需要一个新的visited
+            bool found = false;
+            queue<edge> q;
+            q.push({from, 1.0});                                //  q需要同时记录当前节点和当前路径积
             while (!q.empty()) {
-                auto cur = q.front();
-                q.pop();
-                int cur_node = cur.first;
-                double weight = cur.second;
-                if (cur_node == end) {
+                auto [node, cur_prod] = q.front();              //  节点和路径积
+                if (node == to) {
                     found = true;
-                    res.push_back(weight);
+                    res.push_back(cur_prod);
                     break;
                 }
-                if (visited[cur_node]) continue;
-                visited[cur_node] = true;
-                
-                for (auto neighbor: graph[cur_node]) {
-                    int neighbor_node = neighbor.first;
-                    double neighbor_weight = neighbor.second;
-                    q.emplace(neighbor_node, weight * neighbor_weight);     //  用拷贝的节点保存路径积，每次计算请求会创建新的queue因此所有节点会被清空重新计算
+                q.pop();
+                for (auto neighbor: graph[node]) {
+                    string next = neighbor.first;
+                    double weight = neighbor.second;
+                    if (visited[next]) continue;
+                    visited[next] = true;
+                    q.push({next, cur_prod * weight});
                 }
             }
-            if (!found) res.push_back(-1.0);
+            if (!found) res.push_back(-1.0);                    //  如果遍历完所有节点也没有找到，则压入-1.0
         }
         return res;
     }

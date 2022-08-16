@@ -1,4 +1,4 @@
-//  n个数字的数组，索引从[0, n - 1], 我们将索引++变成[1, n]，让所有数组中的数字和索引异或运算，最后能找到那个缺失的数字
+//  核心思路就是让整个nums数组中的所有数字和[1, n]数字做异或运算，结果就是缺少的那个数字
 class Solution {
 public:
     int missingNumber(vector<int>& nums) {

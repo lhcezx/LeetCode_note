@@ -42,7 +42,7 @@ public:
     }
 
     ListNode* mergeSort(ListNode* head) {
-        if (head == nullptr || head->next == nullptr) return head;
+        if (head == nullptr || head->next == nullptr) return head;           //  当head->next == nullptr代表当前链表只有一个节点，无法再分割，直接返回该节点
         ListNode* mid = getMid(head);
         ListNode* left_start = mergeSort(head);                              //  将前半段链表排好序并获得其头节点
         ListNode* right_start = mergeSort(mid);                              //  将后半段链表排好序并获得其头节点

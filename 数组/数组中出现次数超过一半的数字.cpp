@@ -6,16 +6,24 @@
 //  2. n1不是我们要找的众数x，因为n1是我们假定的众数，那也就说明n1占了抵消的数组中一般的数量，另一半数量中的数字可能是我们要找的众数x，也可能是其他数字，因为都会被当作非众数对待，因此抵消掉的数字中，真正的众数x至多存在一半，至少存在0个。这样的情况下我们依然可以考虑剩下数字组成的的数组中，x依然为众数，因此同样缩小了区间范围。
 
 //  如此循环直到区间大小为1，也就是只剩下一个数字就是众数本身，返回众数x
+
+
 class Solution {
 public:
     int majorityElement(vector<int>& nums) {
-        int x;          // 设x为我们想要找到的众数
-        int vote = 0;   //  投票的票数
-        for (int num: nums) {    
-            if (vote == 0) x = num;    //   当票数为0的时候，让抵消掉的数字后的第一个数字假定为众数
-            if (num == x) vote++;      //   如果后面的数字等于假定的众数，则vote++，否则--
-            else vote--;
+        int n = nums.size();
+        int candidate = 0;                      //  我们要找的众数
+        int counter = 0;
+        for (int num: nums) {
+            if (counter == 0) {                 //  当众数数量和其他数字抵消为0时，重选众数
+                candidate = num;
+                counter = 1;
+            } else if (num == candidate) {      //  若为众数counter++，否则--
+                counter++;
+            } else if (num != candidate) {
+                counter--;
+            }
         }
-        return x;                      //   直到遍历完所有数字后，返回x
+        return candidate;
     }
 };
