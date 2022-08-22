@@ -1,16 +1,24 @@
+//  滑动窗口
 class Solution {
 public:
     int lengthOfLongestSubstring(string s) {
-        int res = 0, i = -1;
-        unordered_map<int, int> hash_map;
-
-        for (int j = 0; j < s.length(); ++j) {
-            if (hash_map.find(s[j]) != hash_map.end()) {
-                i = max(i, hash_map.at(s[j]));
+        int max_len = 0;
+        int i = 0, j = 0;
+        unordered_map<char, int> mp;            //  每个出现的字符的下标
+        while (j < s.length()) {
+            if (!mp.count(s[j])) {
+                mp[s[j]] = j;
+                j++;
+            } else {
+                max_len = max(max_len, j - i);
+                int idx = mp[s[j]];
+                while (i <= idx && i < j) {
+                    mp.erase(s[i++]);
+                }
             }
-            hash_map[s[j]]= j;
-            res = max(res, j - i);
         }
-        return res;
+        max_len = max(max_len, j - i);
+        return max_len;
     }
 };
+

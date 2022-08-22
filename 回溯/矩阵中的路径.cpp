@@ -1,30 +1,26 @@
 class Solution {
 public:
-    int rows, columes;
+    bool dfs(vector<vector<char>>& board, string& word, int i, int j, vector<vector<bool>>& visited, int idx) {
+        int m = board.size(), n = board[0].size();
+        if (idx == word.size()) return true;
+        if (i < 0 || i >= m || j < 0 || j >= n || visited[i][j]) return false;
+        visited[i][j] = true;
+        bool res = false;
+        if (board[i][j] == word[idx]) {
+            res = dfs(board, word, i + 1, j, visited, idx + 1) || dfs(board, word, i - 1, j, visited, idx + 1) || dfs(board, word, i, j + 1, visited, idx + 1) || dfs(board, word, i, j - 1, visited, idx + 1);
+        }
+        visited[i][j] = false;
+        return res;
+    }
+
     bool exist(vector<vector<char>>& board, string word) {
-        rows = board.size(), columes = board[0].size();
-        int row, colume, counter;
-        for (int i = 0; i < rows; ++i) {
-            for (int j = 0; j < columes; ++j) {
-                if (board[i][j] == word[0]) {
-                    row = i;
-                    colume = j;
-                    counter = 0;
-                    if (research(board, row, colume, counter, word)) {return true;}
-                }
+        int m = board.size(), n = board[0].size();
+        vector<vector<bool>> visited(m, vector<bool> (n, false));
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dfs(board, word, i, j, visited, 0)) return true;
             }
         }
         return false;
-    }
-    
-
-    bool research(vector<vector<char>>& board, int i, int j, int counter, string word) {
-        bool res;
-        if (i >= rows || i < 0 || j >= columes || j < 0 || board[i][j] != word[counter]) return false;
-        if (counter == word.length() || word.length() == 1) return true;
-        board[i][j] = '\0';
-        res = research(board, i+1, j, counter+1, word) || research(board, i-1, j, counter+1, word) || research(board, i, j+1, counter+1, word) || research(board, i, j-1, counter+1, word);
-        board[i][j] = word[counter];
-        return res;
     }
 };

@@ -1,32 +1,36 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
 class Solution {
 public:
     vector<vector<int>> levelOrder(TreeNode* root) {
-        vector<vector<int>> res;
         queue<TreeNode*> q;
-        TreeNode* node;
-        bool IsOrderLeft = true;
-        if (!root) {
-            return res;
-        }
+        vector<vector<int>> res;
+        if (root == nullptr) return res;
         q.push(root);
-
+        int level = 0;
         while (!q.empty()) {
+            int sz = q.size();
             deque<int> dq;
-            int size = q.size();
-            for (int i = 0; i < size; ++i) {
-                // 这部分代码是为了将节点按照要求顺序存到双端队列中，如果对打印从左到右顺序没有要求则不需要这个双端队列
-                if (IsOrderLeft) {
-                    dq.push_back(q.front()->val);
-                } else {
-                    dq.push_front(q.front()->val);
-                }
-                //
-                if (q.front()->left) {q.push(q.front()->left);}
-                if (q.front()->right) {q.push(q.front()->right);}
+            for (int i = 0; i < sz; i++) {
+                TreeNode* cur = q.front();
                 q.pop();
+                if (level % 2 == 0) {                           //  偶数层从左向右入队，奇数层从右向左入队
+                    dq.push_back(cur->val);
+                } else {
+                    dq.push_front(cur->val);
+                }
+                if (cur->left != nullptr) q.push(cur->left);  
+                if (cur->right != nullptr) q.push(cur->right);
             }
-            res.push_back(vector<int>(dq.begin(), dq.end()));
-            IsOrderLeft = !IsOrderLeft;
+            level++;
+            res.push_back(vector<int> (dq.begin(), dq.end()));
         }
         return res;
     }
